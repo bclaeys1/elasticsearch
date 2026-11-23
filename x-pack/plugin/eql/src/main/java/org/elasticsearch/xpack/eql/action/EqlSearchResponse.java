@@ -33,7 +33,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.transport.LeakTracker;
 import org.elasticsearch.xcontent.ConstructingObjectParser;
-import org.elasticsearch.xcontent.InstantiatingObjectParser;
 import org.elasticsearch.xcontent.ObjectParser;
 import org.elasticsearch.xcontent.ParseField;
 import org.elasticsearch.xcontent.ToXContentFragment;
@@ -84,22 +83,29 @@ public class EqlSearchResponse extends ActionResponse implements ToXContentObjec
     private static final ParseField IS_PARTIAL = new ParseField(Fields.IS_PARTIAL);
     private static final ParseField SHARD_FAILURES = new ParseField(Fields.SHARD_FAILURES);
 
-    private static final InstantiatingObjectParser<EqlSearchResponse, Void> PARSER;
+    @SuppressWarnings("unchecked")
+    private static final ConstructingObjectParser<EqlSearchResponse, Void> PARSER = new ConstructingObjectParser<>(
+        "eql/search_response",
+        true,
+        args -> new EqlSearchResponse(
+            (EqlSearchResponse.Hits) args[0],
+            (long) args[1],
+            (boolean) args[2],
+            (String) args[3],
+            (boolean) args[4],
+            (boolean) args[5],
+            Objects.requireNonNullElse((List<ShardSearchFailure>) args[6], List.of())
+        )
+    );
 
     static {
-        InstantiatingObjectParser.Builder<EqlSearchResponse, Void> parser = InstantiatingObjectParser.builder(
-            "eql/search_response",
-            true,
-            EqlSearchResponse.class
-        );
-        parser.declareObject(constructorArg(), (p, c) -> Hits.fromXContent(p), HITS);
-        parser.declareLong(constructorArg(), TOOK);
-        parser.declareBoolean(constructorArg(), TIMED_OUT);
-        parser.declareString(optionalConstructorArg(), ID);
-        parser.declareBoolean(constructorArg(), IS_RUNNING);
-        parser.declareBoolean(constructorArg(), IS_PARTIAL);
-        parser.declareObjectArray(optionalConstructorArg(), (p, c) -> List.of(), SHARD_FAILURES);
-        PARSER = parser.build();
+        PARSER.declareObject(constructorArg(), (p, c) -> Hits.fromXContent(p), HITS);
+        PARSER.declareLong(constructorArg(), TOOK);
+        PARSER.declareBoolean(constructorArg(), TIMED_OUT);
+        PARSER.declareString(optionalConstructorArg(), ID);
+        PARSER.declareBoolean(constructorArg(), IS_RUNNING);
+        PARSER.declareBoolean(constructorArg(), IS_PARTIAL);
+        PARSER.declareObjectArray(optionalConstructorArg(), (p, c) -> List.of(), SHARD_FAILURES);
     }
 
     public EqlSearchResponse(Hits hits, long tookInMillis, boolean isTimeout, List<ShardSearchFailure> shardFailures) {
