@@ -105,7 +105,8 @@ public class EqlSearchResponse extends ActionResponse implements ToXContentObjec
         PARSER.declareString(optionalConstructorArg(), ID);
         PARSER.declareBoolean(constructorArg(), IS_RUNNING);
         PARSER.declareBoolean(constructorArg(), IS_PARTIAL);
-        PARSER.declareObjectArray(optionalConstructorArg(), (p, c) -> List.of(), SHARD_FAILURES);
+        // can only read ShardSearchFailure in tests
+        PARSER.declareObjectArray(optionalConstructorArg(), (p, c) -> null, SHARD_FAILURES);
     }
 
     public EqlSearchResponse(Hits hits, long tookInMillis, boolean isTimeout, List<ShardSearchFailure> shardFailures) {

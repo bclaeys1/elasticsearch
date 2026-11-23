@@ -11,7 +11,6 @@ import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.support.SubscribableListener;
 import org.elasticsearch.client.internal.Client;
-import org.elasticsearch.common.util.CollectionUtils;
 import org.elasticsearch.compute.data.Page;
 import org.elasticsearch.compute.operator.DriverContext;
 import org.elasticsearch.compute.operator.IsBlockedResult;
@@ -112,7 +111,7 @@ public class EqlSourceOperator extends SourceOperator {
                 // This callback runs on the EQL response thread, outside the driver run loop, so the blocks must come from
                 // the root factory: the driver's local breaker may only be touched by the driver thread.
                 // isPartial() only flags a still-running async response; a completed one reports lost shards in shardFailures().
-                partial = CollectionUtils.isEmpty(response.shardFailures()) == false;
+                partial = response.shardFailures().isEmpty() == false;
                 Page built = EqlPageConverter.toPage(response, mode, schema, driverContext.blockFactory().parent());
                 synchronized (this) {
                     if (closed) {
