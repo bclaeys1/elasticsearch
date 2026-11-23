@@ -538,7 +538,8 @@ public class EqlSourceOperatorTests extends AnyOperatorTestCase {
             hits,
             1,
             false,
-            List.of(new ShardSearchFailure(new IllegalStateException("shard failure"))));
+            List.of(new ShardSearchFailure(new IllegalStateException("shard failure")))
+        );
 
         SourceOperator operator = operator(
             client,
